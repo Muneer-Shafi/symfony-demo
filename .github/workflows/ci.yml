@@ -32,7 +32,7 @@ jobs:
         context: .
         file: ./docker/Dockerfile-php
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/demo_php:latest
+        tags: muneer1997/demo_php:latest
 
     # Optional: Build the Nginx image as well
     - name: Build and Push Nginx Image
