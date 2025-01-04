@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
-        file: ./docker/Dockerfile-php  # Path to the Dockerfile
+        file: ./docker/Dockerfile-php
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/demo_php:latest
 
@@ -39,6 +39,6 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
-        file: ./docker/Dockerfile-nginx  # Path to the Dockerfile
+        file: ./docker/Dockerfile-nginx
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/demo_nginx:latest
