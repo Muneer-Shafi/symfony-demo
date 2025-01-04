@@ -60,6 +60,8 @@ RUN { \
     # echo "xdebug.client_host=$(ip route | awk '/default/ { print $3 }')"; \
     } >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
+COPY ./build/php/opcache.ini /usr/local/etc/php/conf.d/
+COPY ./build/php/error_reporting.ini /usr/local/etc/php/conf.d/
 
 # Install Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash \
@@ -80,11 +82,6 @@ RUN usermod -u 1000 www-data \
 
 # Set working directory
 WORKDIR /var/www/demo/
-
-
-# COPY build/php/opcache.ini /usr/local/etc/php/conf.d/
-# COPY build/php/error_reporting.ini /usr/local/etc/php/conf.d/
-
 
 # Run Composer install (uncomment if required during build)
 # RUN composer install
