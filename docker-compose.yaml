@@ -3,11 +3,11 @@ services:
   fpm:
     container_name: demo_php
     build:
-      context: ./docker
-      dockerfile: Dockerfile-php
+      context: .
+      dockerfile: ./docker/Dockerfile-php
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      
+
     volumes:
       - ./:/var/www/demo/:cached
     environment:
@@ -30,8 +30,8 @@ services:
   nginx:
     container_name: demo_nginx
     build:
-      context: ./docker
-      dockerfile: Dockerfile-nginx
+      context: .
+      dockerfile: ./docker/Dockerfile-nginx
     volumes:
       - ./:/var/www/demo/:cached
     ports:
@@ -40,8 +40,6 @@ services:
       - fpm
     networks:
       - app_network
-
-
 
 networks:
   app_network:

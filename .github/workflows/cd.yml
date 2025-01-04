@@ -1,0 +1,27 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull PHP Docker image
+        run: sudo docker pull muneer1997/demo_php:latest
+
+      - name: Pull NGINX Docker image
+        run: sudo docker pull muneer1997/demo_nginx:latest
+
+      - name: Delete Old docker container
+        run: sudo docker rm -f demo_php || true
+
+      - name: Delete Old docker container
+        run: sudo docker rm -f demo_nginx || true
+
+      - name: Run Docker Container
+        run: docker compose up -d
