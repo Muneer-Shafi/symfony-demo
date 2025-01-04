@@ -1,0 +1,87 @@
+FROM php:8.2-fpm
+
+# Install dependencies and PHP extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    zlib1g-dev \
+    libxml2-dev \
+    libpng-dev \
+    libzip-dev \
+    vim \
+    curl \
+    debconf \
+    subversion \
+    apt-transport-https \
+    apt-utils \
+    build-essential \
+    locales \
+    acl \
+    mailutils \
+    wget \
+    nodejs \
+    zip \
+    unzip \
+    gnupg \
+    sudo \
+    ssh \
+    && docker-php-ext-install \
+    pdo_mysql \
+    soap \
+    zip \
+    opcache \
+    gd \
+    intl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Xdebug
+
+# Install Xdebug via PECL
+RUN pecl channel-update pecl.php.net \
+    && pecl install xdebug-3.2.1 || { \
+    echo "PECL failed. Installing Xdebug from source."; \
+    curl -fsSL https://xdebug.org/files/xdebug-3.2.1.tgz -o /tmp/xdebug.tgz && \
+    tar -xf /tmp/xdebug.tgz -C /tmp && \
+    cd /tmp/xdebug-3.2.1 && \
+    phpize && ./configure && make && make install && \
+    rm -rf /tmp/xdebug*; \
+    } \
+    && docker-php-ext-enable xdebug
+
+# Xdebug Configuration
+RUN { \
+    echo "xdebug.mode=debug,develop"; \
+    echo "xdebug.client_port=9003"; \
+    echo "xdebug.start_with_request=yes"; \
+    echo "xdebug.log=/tmp/xdebug.log"; \
+    echo "xdebug.log_level=7"; \
+    # For Linux, use host network gateway IP
+    echo "xdebug.client_host=host.gateway.internal"; \
+    # Or dynamically find host IP
+    # echo "xdebug.client_host=$(ip route | awk '/default/ { print $3 }')"; \
+    } >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+COPY build/php/opcache.ini /usr/local/etc/php/conf.d/
+COPY build/php/error_reporting.ini /usr/local/etc/php/conf.d/
+
+# Install Symfony CLI
+RUN curl -sS https://get.symfony.com/cli/installer | bash \
+    && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN chmod +x /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
+# Set up permissions
+RUN usermod -u 1000 www-data \
+    && usermod -a -G www-data root \
+    && mkdir -p /var/www \
+    && chown -R www-data:www-data /var/www \
+    && mkdir -p /var/www/.composer \
+    && chown -R www-data:www-data /var/www/.composer
+
+# Set working directory
+WORKDIR /var/www/demo/
+
+# Run Composer install (uncomment if required during build)
+# RUN composer install

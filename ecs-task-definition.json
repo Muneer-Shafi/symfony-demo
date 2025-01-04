@@ -1,0 +1,50 @@
+name: demo
+services:
+  fpm:
+    build:
+      context: /home/muneer/Desktop/Symfony/demo/docker
+      dockerfile: Dockerfile-php
+    container_name: demo_php
+    environment:
+      PHP_IDE_CONFIG: serverName=symfony-docker
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003 start_with_request=yes log_level=7 log=/tmp/xdebug.log
+      XDEBUG_MODE: debug
+      XDEBUG_SESSION_START: "1"
+    expose:
+      - "9003"
+    extra_hosts:
+      - host.docker.internal=host-gateway
+    networks:
+      app_network: null
+    volumes:
+      - type: bind
+        source: /home/muneer/Desktop/Symfony/demo
+        target: /var/www/demo
+        bind:
+          create_host_path: true
+  nginx:
+    build:
+      context: /home/muneer/Desktop/Symfony/demo/docker
+      dockerfile: Dockerfile-nginx
+    container_name: demo_nginx
+    depends_on:
+      fpm:
+        condition: service_started
+        required: true
+    networks:
+      app_network: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "8080"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/muneer/Desktop/Symfony/demo
+        target: /var/www/demo
+        bind:
+          create_host_path: true
+networks:
+  app_network:
+    name: demo_app_network
+    driver: bridge
