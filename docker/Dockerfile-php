@@ -45,7 +45,7 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN chmod +x /usr/bin/composer
-ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Set up permissions
 RUN usermod -u 1000 www-data \
