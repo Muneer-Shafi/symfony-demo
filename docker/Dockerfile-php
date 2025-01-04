@@ -35,8 +35,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 
-COPY ./build/opcache.ini /usr/local/etc/php/conf.d/
-COPY ./build/error_reporting.ini /usr/local/etc/php/conf.d/
+COPY ./docker/build/opcache.ini /usr/local/etc/php/conf.d/
+COPY ./docker/build/error_reporting.ini /usr/local/etc/php/conf.d/
 
 # Install Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash \
