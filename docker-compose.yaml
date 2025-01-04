@@ -1,4 +1,5 @@
 version: "3.7"
+
 services:
   fpm:
     container_name: demo_php
@@ -7,11 +8,10 @@ services:
       dockerfile: ./docker/Dockerfile-php
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
     volumes:
       - ./:/var/www/demo/:cached
     environment:
-      # Enhanced Xdebug configuration
+      # Enhanced Xdebug configuration (optional, only if using Xdebug)
       PHP_IDE_CONFIG: "serverName=symfony-docker"
       XDEBUG_MODE: "debug"
       XDEBUG_SESSION_START: 1
@@ -21,7 +21,6 @@ services:
         start_with_request=yes
         log_level=7
         log=/tmp/xdebug.log
-    # Ensure these ports are exposed for Xdebug
     expose:
       - 9003
     networks:

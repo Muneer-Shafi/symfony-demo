@@ -1,5 +1,16 @@
-FROM nginx
+FROM nginx:latest
+
+# Install necessary utilities to use usermod
+RUN apt-get update && apt-get install -y passwd
+
+# Copy your custom Nginx configuration
 COPY ./docker/build/default.conf /etc/nginx/conf.d/
 
+# Create the upstream config
 RUN echo "upstream php-upstream { server fpm:9000; }" > /etc/nginx/conf.d/upstream.conf
+
+# Change the user ID for the www-data user (optional)
 RUN usermod -u 1000 www-data
+
+# Expose the port the container will listen on
+EXPOSE 80
