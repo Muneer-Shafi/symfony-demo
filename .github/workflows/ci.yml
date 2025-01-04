@@ -41,4 +41,4 @@ jobs:
         context: .
         file: ./docker/Dockerfile-nginx
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/demo_nginx:latest
+        tags: muneer1997/demo_nginx:latest
