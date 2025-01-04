@@ -82,8 +82,8 @@ RUN usermod -u 1000 www-data \
 WORKDIR /var/www/demo/
 
 
-COPY build/php/opcache.ini /usr/local/etc/php/conf.d/
-COPY build/php/error_reporting.ini /usr/local/etc/php/conf.d/
+# COPY build/php/opcache.ini /usr/local/etc/php/conf.d/
+# COPY build/php/error_reporting.ini /usr/local/etc/php/conf.d/
 
 
 # Run Composer install (uncomment if required during build)
