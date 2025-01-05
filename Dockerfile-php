@@ -33,8 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     intl \
     && rm -rf /var/lib/apt/lists/*
 
-
-
+# Copy PHP configuration files
 COPY ./docker/build/opcache.ini /usr/local/etc/php/conf.d/
 COPY ./docker/build/error_reporting.ini /usr/local/etc/php/conf.d/
 
@@ -47,7 +46,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN chmod +x /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Set up permissions
+# Set up permissions for the www-data user
 RUN usermod -u 1000 www-data \
     && usermod -a -G www-data root \
     && mkdir -p /var/www \
@@ -56,15 +55,24 @@ RUN usermod -u 1000 www-data \
     && chown -R www-data:www-data /var/www/.composer
 
 # Set working directory
-WORKDIR /var/www/demo/
+WORKDIR /var/www/demo
+
+# Copy application code
 COPY . /var/www/demo
 
-# Set permissions
+# Set permissions for the application directory
 RUN chown -R www-data:www-data /var/www/demo
 
-
 # Install dependencies without running post-install scripts
+USER www-data
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Optionally run post-install scripts
-RUN composer run-script post-install-cmd || true
+# Run post-install scripts (optional)
+USER root
+RUN su www-data -s /bin/sh -c "composer run-script post-install-cmd || true"
+
+# Expose ports for PHP-FPM
+EXPOSE 9000
+
+# Start the PHP-FPM server
+CMD ["php-fpm"]
