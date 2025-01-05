@@ -62,6 +62,7 @@ COPY . /var/www/demo
 # Set permissions
 RUN chown -R www-data:www-data /var/www/demo
 
+
 # Install dependencies without running post-install scripts
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 

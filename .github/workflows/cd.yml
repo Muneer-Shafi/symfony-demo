@@ -22,7 +22,17 @@ jobs:
         run: |
           docker pull muneer1997/demo_php:latest
           docker pull muneer1997/demo_nginx:latest
+      - name: Fix Permissions
+        run: |
+            sudo chmod -R 775 vendor
+            sudo chown -R $USER:$USER vendor
 
+      - name: Clean Vendor Directory
+        run: |
+            if [ -d "vendor" ]; then
+            chmod -R 775 vendor
+            rm -rf vendor
+            fi
       - name: Stop and remove existing containers
         run: |
           docker-compose down || true
