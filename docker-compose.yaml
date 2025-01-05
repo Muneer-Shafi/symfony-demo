@@ -15,12 +15,6 @@ services:
       PHP_IDE_CONFIG: "serverName=symfony-docker"
       XDEBUG_MODE: "debug"
       XDEBUG_SESSION_START: 1
-      XDEBUG_CONFIG: >-
-        client_host=host.docker.internal
-        client_port=9003
-        start_with_request=yes
-        log_level=7
-        log=/tmp/xdebug.log
     expose:
       - 9003
     networks:
