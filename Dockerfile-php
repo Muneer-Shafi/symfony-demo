@@ -57,3 +57,13 @@ RUN usermod -u 1000 www-data \
 
 # Set working directory
 WORKDIR /var/www/demo/
+COPY . /var/www/demo
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/demo
+
+# Install dependencies without running post-install scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Optionally run post-install scripts
+RUN composer run-script post-install-cmd || true

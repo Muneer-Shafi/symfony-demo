@@ -1,0 +1,10 @@
+# Exclude unnecessary files
+var/
+vendor/
+.devcontainer/
+.git/
+node_modules/
+.env.local
+.env.*
+.cache/
+.DS_Store
