@@ -33,7 +33,7 @@ jobs:
 
       - name: Run composer install
         run: |
-          docker-compose exec -T demo_php bash -c "cd /var/www/demo && composer install --no-dev --optimize-autoloader"
+          docker exec -it demo_php bash -c "cd /var/www/demo && composer install"
 
       - name: Clean up old images
         run: |
