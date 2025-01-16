@@ -13,6 +13,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -58,5 +59,14 @@ final class SecurityController extends AbstractController
             // last authentication error (if any)
             'error' => $helper->getLastAuthenticationError(),
         ]);
+    }
+
+    #[Route('/health-check', name: 'health_check', methods: ['GET'])]
+    public function check(): JsonResponse
+    {
+        return new JsonResponse(
+            ['status' => 'ok'],
+            Response::HTTP_OK // 200
+        );
     }
 }

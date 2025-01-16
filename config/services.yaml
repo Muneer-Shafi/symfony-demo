@@ -28,5 +28,17 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    App\Service\OpenApiService:
+        arguments:
+            $schemaPath: '%kernel.project_dir%/config/qbil.yaml'
+
+    App\Service\ChatbotService:
+        arguments:
+            $ollamaService: '@App\Service\OllamaService'
+            $openApiService: '@App\Service\OpenApiService'
+
+
+    App\Service\OllamaService:
+        arguments:
+            $baseUrl: '%env(OLLAMA_URL)%'
+            $model: '%env(OLLAMA_MODEL)%'

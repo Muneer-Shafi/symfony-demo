@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install dependencies and PHP extensions
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     zlib1g-dev \
@@ -33,46 +33,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     intl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy PHP configuration files
-COPY ./docker/build/opcache.ini /usr/local/etc/php/conf.d/
-COPY ./docker/build/error_reporting.ini /usr/local/etc/php/conf.d/
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash \
-    && mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
+    && mv /root/.symfony*/bin/symfony /usr/local/bin/symfony
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN chmod +x /usr/bin/composer
-ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Set up permissions for the www-data user
-RUN usermod -u 1000 www-data \
-    && usermod -a -G www-data root \
-    && mkdir -p /var/www \
-    && chown -R www-data:www-data /var/www \
-    && mkdir -p /var/www/.composer \
-    && chown -R www-data:www-data /var/www/.composer
+# Copy PHP configuration files
+COPY ./docker/build/php/opcache.ini /usr/local/etc/php/conf.d/
+COPY ./docker/build/php/error_reporting.ini /usr/local/etc/php/conf.d/
 
 # Set working directory
-WORKDIR /var/www/demo
+WORKDIR /var/www/symfony
 
-# Copy application code
-COPY . /var/www/demo
+# Copy application files
+COPY . /var/www/symfony
 
 # Set permissions for the application directory
-RUN chown -R www-data:www-data /var/www/demo
+RUN mkdir -p /var/www/symfony/var \
+    && chown -R www-data:www-data /var/www/symfony \
+    && chmod -R 777 /var/www/symfony/var
 
-# Install dependencies without running post-install scripts
+# Switch to the www-data user
 USER www-data
-RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Run post-install scripts (optional)
-USER root
-RUN su www-data -s /bin/sh -c "composer run-script post-install-cmd || true"
+# Install Symfony dependencies
+RUN composer install
+#--no-dev --optimize-autoloader --no-scripts
 
-# Expose ports for PHP-FPM
+# Expose PHP-FPM port
 EXPOSE 9000
 
-# Start the PHP-FPM server
+# Start PHP-FPM
 CMD ["php-fpm"]
