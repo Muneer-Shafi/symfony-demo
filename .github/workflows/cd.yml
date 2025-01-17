@@ -33,7 +33,7 @@ jobs:
 
       - name: Run composer install
         run: |
-        #   docker exec -it demo_php bash -c "cd /var/www/demo && composer install"
+          docker exec demo_php composer install --working-dir=/var/www/demo --no-interaction
 
       - name: Clean up old images
         run: |
