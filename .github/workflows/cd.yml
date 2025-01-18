@@ -11,30 +11,39 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Log in to Docker Hub
       - name: Login to Docker Hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      # Step 3: Pull the latest Docker images
       - name: Pull Docker images
         run: |
           docker pull muneer1997/demo_php:latest
           docker pull muneer1997/demo_nginx:latest
 
+      # Step 4: Stop and remove existing containers (handle errors gracefully)
       - name: Stop and remove existing containers
         run: |
-          docker-compose down || true
+          docker-compose down || echo "No containers to stop"
 
+      # Step 5: Deploy the application with Docker Compose
       - name: Deploy with Docker Compose
         run: |
-          docker-compose up -d
+          docker-compose up -d --remove-orphans
 
+      # Step 6: Run Composer install
       - name: Run composer install
         run: |
           docker exec demo_php composer install --working-dir=/var/www/demo --no-interaction
+        env:
+          COMPOSER_ALLOW_SUPERUSER: 1 # Avoids potential warnings
 
+      # Step 7: Clean up old Docker images
       - name: Clean up old images
         run: |
           docker image prune -f
