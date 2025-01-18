@@ -36,14 +36,23 @@ jobs:
         run: |
           docker-compose up -d --remove-orphans
 
-      # Step 6: Run Composer install
+      # Step 6: Fix ownership and add safe directory for Git
+      - name: Set up permissions and Git safe directory
+        run: |
+          docker exec demo_php bash -c "
+          git config --global --add safe.directory /var/www/demo && \
+          chown -R www-data:www-data /var/www/demo && \
+          chmod -R 775 /var/www/demo
+          "
+
+      # Step 7: Run Composer install
       - name: Run composer install
         run: |
           docker exec demo_php composer install --working-dir=/var/www/demo --no-interaction
         env:
           COMPOSER_ALLOW_SUPERUSER: 1 # Avoids potential warnings
 
-      # Step 7: Clean up old Docker images
+      # Step 8: Clean up old Docker images
       - name: Clean up old images
         run: |
           docker image prune -f
