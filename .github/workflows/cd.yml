@@ -26,39 +26,33 @@ jobs:
           docker pull muneer1997/demo_php:latest
           docker pull muneer1997/demo_nginx:latest
 
-      # Step 4: Stop and remove existing containers (handle errors gracefully)
+      # Step 4: Stop and remove existing containers
       - name: Stop and remove existing containers
         run: |
-          docker-compose down || echo "No containers to stop"
+          docker-compose down --remove-orphans || true
 
       # Step 5: Deploy the application with Docker Compose
       - name: Deploy with Docker Compose
         run: |
           docker-compose up -d --remove-orphans
 
-      # Step 6: Fix ownership and add safe directory for Git
-      - name: Set up permissions and Git safe directory
+      # Step 6: Fix Git permissions and ownership
+      - name: Fix Git and directory permissions
         run: |
           docker exec demo_php bash -c "
           git config --global --add safe.directory /var/www/demo && \
           chown -R www-data:www-data /var/www/demo && \
           chmod -R 775 /var/www/demo
           "
-      - name: Set up permissions and Git safe directory
-        run: |
-            docker exec demo_php bash -c "
-            mkdir -p ~/.git && \
-            git config --global --add safe.directory /var/www/demo
-            "
         env:
-            HOME: /tmp # Redirect HOME to a writable directory
+          HOME: /tmp # Redirect HOME to a writable directory to avoid permission issues
 
       # Step 7: Run Composer install
       - name: Run composer install
         run: |
           docker exec demo_php composer install --working-dir=/var/www/demo --no-interaction
         env:
-          COMPOSER_ALLOW_SUPERUSER: 1 # Avoids potential warnings
+          COMPOSER_ALLOW_SUPERUSER: 1
 
       # Step 8: Clean up old Docker images
       - name: Clean up old images
