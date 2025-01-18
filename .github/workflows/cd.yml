@@ -36,13 +36,14 @@ jobs:
         run: |
           docker-compose up -d --remove-orphans
 
-      # Step 6: Fix Git permissions and ownership
+      # Step 6: Fix Git permissions and set up safe directory
       - name: Fix Git and directory permissions
         run: |
           docker exec demo_php bash -c "
-          git config --global --add safe.directory /var/www/demo && \
-          chown -R www-data:www-data /var/www/demo && \
-          chmod -R 775 /var/www/demo
+            mkdir -p ~/.git && \
+            git config --global --add safe.directory /var/www/demo && \
+            chown -R www-data:www-data /var/www/demo && \
+            chmod -R 775 /var/www/demo
           "
         env:
           HOME: /tmp # Redirect HOME to a writable directory to avoid permission issues
