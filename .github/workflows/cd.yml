@@ -44,6 +44,14 @@ jobs:
           chown -R www-data:www-data /var/www/demo && \
           chmod -R 775 /var/www/demo
           "
+      - name: Set up permissions and Git safe directory
+        run: |
+            docker exec demo_php bash -c "
+            mkdir -p ~/.git && \
+            git config --global --add safe.directory /var/www/demo
+            "
+        env:
+            HOME: /tmp # Redirect HOME to a writable directory
 
       # Step 7: Run Composer install
       - name: Run composer install
