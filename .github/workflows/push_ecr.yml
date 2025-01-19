@@ -1,0 +1,58 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 3: Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Step 4: Build Docker image for PHP
+      - name: Build PHP Docker image
+        run: |
+          docker build -t demo_php:latest -f Dockerfile-php .
+
+      # Step 5: Tag Docker image for ECR (PHP)
+      - name: Tag PHP Docker image for ECR
+        run: |
+          docker tag demo_php:latest ${{ steps.login-ecr.outputs.registry }}/demo_php:latest
+
+      # Step 6: Push PHP Docker image to ECR
+      - name: Push PHP Docker image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/demo_php:latest
+
+      # Step 7: Build Docker image for Nginx
+      - name: Build Nginx Docker image
+        run: |
+          docker build -t demo_nginx:latest -f Dockerfile-nginx .
+
+      # Step 8: Tag Docker image for ECR (Nginx)
+      - name: Tag Nginx Docker image for ECR
+        run: |
+          docker tag demo_nginx:latest ${{ steps.login-ecr.outputs.registry }}/demo_nginx:latest
+
+      # Step 9: Push Nginx Docker image to ECR
+      - name: Push Nginx Docker image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/demo_nginx:latest
