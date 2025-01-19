@@ -39,14 +39,12 @@ jobs:
       # Step 6: Fix Git permissions and set up safe directory
       - name: Fix Git and directory permissions
         run: |
-          docker exec demo_php bash -c "
-            mkdir -p ~/.git && \
+          docker exec -u root demo_php bash -c "
+            mkdir -p /var/www/.git && \
             git config --global --add safe.directory /var/www/demo && \
             chown -R www-data:www-data /var/www/demo && \
             chmod -R 775 /var/www/demo
           "
-        env:
-          HOME: /tmp # Redirect HOME to a writable directory to avoid permission issues
 
       # Step 7: Run Composer install
       - name: Run composer install
