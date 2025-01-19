@@ -5,54 +5,58 @@ on:
     branches:
       - main
 
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY_PHP: demo_php
+  ECR_REPOSITORY_NGINX: demo_nginx
+  ECS_SERVICE: demo-service
+  ECS_CLUSTER: demo-cluster
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Step 3: Log in to Amazon ECR
-      - name: Log in to Amazon ECR
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 4: Build Docker image for PHP
-      - name: Build PHP Docker image
+      - name: Build, tag, and push PHP image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t demo_php:latest -f Dockerfile-php .
+          # Build PHP image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PHP:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PHP:latest -f Dockerfile-php .
 
-      # Step 5: Tag Docker image for ECR (PHP)
-      - name: Tag PHP Docker image for ECR
-        run: |
-          docker tag demo_php:latest ${{ steps.login-ecr.outputs.registry }}/demo_php:latest
+          # Push PHP image
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PHP:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_PHP:latest
 
-      # Step 6: Push PHP Docker image to ECR
-      - name: Push PHP Docker image to ECR
-        run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/demo_php:latest
+          # Store PHP image URI for ECS deployment
+          echo "PHP_IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY_PHP:$IMAGE_TAG" >> $GITHUB_ENV
 
-      # Step 7: Build Docker image for Nginx
-      - name: Build Nginx Docker image
+      - name: Build, tag, and push Nginx image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t demo_nginx:latest -f Dockerfile-nginx .
+          # Build Nginx image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_NGINX:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_NGINX:latest -f Dockerfile-nginx .
 
-      # Step 8: Tag Docker image for ECR (Nginx)
-      - name: Tag Nginx Docker image for ECR
-        run: |
-          docker tag demo_nginx:latest ${{ steps.login-ecr.outputs.registry }}/demo_nginx:latest
+          # Push Nginx image
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_NGINX:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_NGINX:latest
 
-      # Step 9: Push Nginx Docker image to ECR
-      - name: Push Nginx Docker image to ECR
-        run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/demo_nginx:latest
+          # Store Nginx image URI for ECS deployment
+          echo "NGINX_IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY_NGINX:$IMAGE_TAG" >> $GITHUB_ENV
