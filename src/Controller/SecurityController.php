@@ -69,4 +69,18 @@ final class SecurityController extends AbstractController
             Response::HTTP_OK // 200
         );
     }
+
+    #[Route('/flash-check', name: 'flash_check', methods: ['GET'])]
+    public function flashCheck(): Response
+    {
+        // $this->addFlash('success', 'Operation completed successfully!');
+        // $this->addFlash('error', 'Something went wrong!');
+        // $this->addFlash('warning', 'Please proceed with caution.');
+        $this->addFlash('notice', 'Here is some useful information.');
+
+        return $this->render('flash.html.twig', [
+
+
+        ]);
+    }
 }

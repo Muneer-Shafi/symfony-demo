@@ -1,0 +1,241 @@
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>
+			{% block title %}Welcome!
+			{% endblock %}
+		</title>
+
+		{# Add this CSS in your assets/styles/app.css or include directly #}
+		<style>
+			.toast-content {
+				display: flex;
+				align-items: center;
+				margin-bottom: 10px;
+			}
+
+			.toast-icon {
+				margin-right: 12px;
+				width: 24px;
+				height: 24px;
+				flex-shrink: 0;
+			}
+
+			.toast-message-wrapper {
+				flex-grow: 1;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.toast-title {
+				font-weight: bold;
+				margin: 0;
+				font-size: 16px;
+			}
+
+			.toast-message {
+				margin: 4px 0 0;
+				font-size: 14px;
+			}
+
+			.toast-close {
+				background: none;
+				border: none;
+				color: #666;
+				cursor: pointer;
+				font-size: 18px;
+				padding: 0;
+				margin-left: 12px;
+				flex-shrink: 0;
+			}
+
+			.toast-progress {
+				width: 100%;
+				height: 4px;
+				background: #eee;
+				border-radius: 2px;
+				overflow: hidden;
+			}
+
+			.toast-progress-bar {
+				height: 100%;
+				border-radius: 2px;
+				transition: width 0.1s linear;
+			}
+
+			/* Toast Types */
+			.toast-success {
+				border-left: 4px solid #22c55e;
+			}
+			.toast-success .toast-progress-bar {
+				background: #22c55e;
+			}
+			.toast-success .toast-icon {
+				color: #22c55e;
+			}
+
+			.toast-error {
+				border-left: 4px solid #ef4444;
+			}
+			.toast-error .toast-progress-bar {
+				background: #ef4444;
+			}
+			.toast-error .toast-icon {
+				color: #ef4444;
+			}
+
+			.toast-warning {
+				border-left: 4px solid #f59e0b;
+			}
+			.toast-warning .toast-progress-bar {
+				background: #f59e0b;
+			}
+			.toast-warning .toast-icon {
+				color: #f59e0b;
+			}
+
+			.toast-info {
+				border-left: 4px solid #3b82f6;
+			}
+			.toast-info .toast-progress-bar {
+				background: #3b82f6;
+			}
+			.toast-info .toast-icon {
+				color: #3b82f6;
+			}
+
+			@keyframes slideDown {
+				from {
+					transform: translateY(-100%);
+					opacity: 0;
+				}
+				to {
+					transform: translateY(0);
+					opacity: 1;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		{# Add the toast container #}
+		<div id="toast-container" class="toast-container"></div>
+
+		{% block body %}
+
+
+        <h1>
+         Flash container
+        </h1>{% endblock %}
+
+		{# Add this JavaScript in your assets/app.js or include directly #}
+		<script>
+			const ICONS = {
+            success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+            error: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+            warning: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+            info: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+            };
+
+            function showToast(type = 'info', title = '', message = '', duration = 5000) {
+                const container = document.getElementById('toast-container');
+
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'toast-content';
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'toast-icon';
+                iconDiv.innerHTML = ICONS[type];
+
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = 'toast-message-wrapper';
+
+                const titleElement = document.createElement('p');
+                titleElement.className = 'toast-title';
+                titleElement.textContent = title;
+
+                const messageElement = document.createElement('p');
+                messageElement.className = 'toast-message';
+                messageElement.textContent = message;
+
+                const closeButton = document.createElement('button');
+                closeButton.className = 'toast-close';
+                closeButton.innerHTML = '×';
+
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'toast-progress';
+
+                const progressBar = document.createElement('div');
+                progressBar.className = 'toast-progress-bar';
+                progressBar.style.width = '100%';
+
+                // Assemble toast
+                messageWrapper.appendChild(titleElement);
+                messageWrapper.appendChild(messageElement);
+                contentDiv.appendChild(iconDiv);
+                contentDiv.appendChild(messageWrapper);
+                contentDiv.appendChild(closeButton);
+                progressDiv.appendChild(progressBar);
+                toast.appendChild(contentDiv);
+                toast.appendChild(progressDiv);
+                container.appendChild(toast);
+
+                // Handle progress bar
+                const startTime = Date.now();
+                const interval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, (duration - elapsed) / duration * 100);
+                progressBar.style.width = `${remaining}%`;
+
+                if (elapsed >= duration) {
+                clearInterval(interval);
+                removeToast();
+                }
+                }, 10);
+
+                // Handle close button
+                const removeToast = () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-100%)';
+                toast.style.transition = 'all 0.3s ease-in-out';
+                setTimeout(() => container.removeChild(toast), 300);
+                clearInterval(interval);
+                };
+
+                closeButton.addEventListener('click', removeToast);
+
+                // Auto remove after duration
+                setTimeout(removeToast, duration);
+            }
+
+            // Handle Symfony flash messages on page load
+            document.addEventListener('DOMContentLoaded', function () {
+            {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                let type = '{{ label }}';
+                // Map Symfony flash types to toast types
+                switch (type) {
+                    case 'notice':
+                     type = 'info';
+                    break;
+                    case 'error':
+                    type = 'error';
+                    break;
+                    case 'warning':
+                    type = 'warning';
+                    break;
+                    case 'success':
+                    type = 'success';
+                    break;
+                }
+                showToast(type, '', '{{ message|e('js') }}')
+                {% endfor %}
+            {% endfor %}
+            });
+		</script>
+	</body>
+</html>

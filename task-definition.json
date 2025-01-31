@@ -1,0 +1,85 @@
+{
+    "family": "demo-task-definition",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "1024",
+    "memory": "2048",
+    "executionRoleArn": "arn:aws:iam::1763-0715-7082:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::1763-0715-7082:role/ecsTaskRole",
+    "containerDefinitions": [
+        {
+            "name": "demo-php",
+            "image": "176307157082.dkr.ecr.ap-south-1.amazonaws.com/demo_php",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 9000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "APP_ENV",
+                    "value": "prod"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/demo-php",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "php"
+                }
+            },
+            "mountPoints": [
+                {
+                    "sourceVolume": "app-code",
+                    "containerPath": "/var/www/demo",
+                    "readOnly": false
+                }
+            ]
+        },
+        {
+            "name": "demo-nginx",
+            "image": "176307157082.dkr.ecr.ap-south-1.amazonaws.com/demo_nginx",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "links": ["demo-php"],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/demo-nginx",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "nginx"
+                }
+            },
+            "mountPoints": [
+                {
+                    "sourceVolume": "app-code",
+                    "containerPath": "/var/www/demo",
+                    "readOnly": true
+                }
+            ],
+            "dependsOn": [
+                {
+                    "containerName": "demo-php",
+                    "condition": "START"
+                }
+            ]
+        }
+    ],
+    "volumes": [
+        {
+            "name": "app-code",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-xxxxxxxxxx",
+                "rootDirectory": "/"
+            }
+        }
+    ]
+}
